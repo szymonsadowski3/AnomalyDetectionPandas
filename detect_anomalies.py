@@ -1,31 +1,9 @@
-# https://towardsdatascience.com/why-and-how-to-use-pandas-with-large-data-9594dda2ea4c
-
-# df_chunk = pd.read_csv(r'../input/data.csv', chunksize=1000000)
-
 import pandas as pd
 
 import psycopg2 as pg
 import pandas.io.sql as psql
 
-# get connected to the database
 connection = pg.connect("dbname='postgres' user='postgres' host='localhost' port='5433' password='admin'")
-# connection = pg.connect("jdbc:postgresql://localhost:5433/postgres")
-
-
-def get_analytic_window_traffic_difference(checked_detector_id):
-    query = f"""
-    (
-        WITH ordered_series AS (
-          SELECT starttime, count FROM traffic WHERE detector_id={checked_detector_id} ORDER BY starttime
-          ) SELECT
-              starttime,
-              count,
-              ABS(count - (LAG(count, 1) OVER ( ORDER BY starttime ))) traffic_diff
-            FROM ordered_series
-      )
-    """
-
-    return pd.read_sql_query(query, con=connection)
 
 
 def get_traffic_data(checked_detector_id):
@@ -66,4 +44,3 @@ def check_traffic_diff_for_anomaly(detector_id):
 
 if __name__ == '__main__':
     check_traffic_diff_for_anomaly(1)
-    # print(res)
